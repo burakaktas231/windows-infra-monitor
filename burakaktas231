@@ -1,0 +1,128 @@
+# 🖥️ Windows Infrastructure Monitor
+
+PowerShell toolkit for monitoring and managing Windows Server infrastructure — disk space, SSL certificates, critical services, DNS, DHCP, network scanning, and Veeam backup status.
+
+![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-blue?logo=powershell)
+![Windows Server](https://img.shields.io/badge/Windows%20Server-2019%2F2022-0078D6?logo=windows)
+![Veeam](https://img.shields.io/badge/Veeam-B%26R-00B336?logo=veeam)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=github-actions)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+---
+
+## 📁 Structure
+
+```
+├── Monitoring/          Server health checks
+│   ├── Check-DiskSpace.ps1
+│   ├── Check-SSLCertExpiry.ps1
+│   ├── Watch-CriticalServices.ps1
+│   └── Check-WindowsUpdates.ps1
+│
+├── Network/             DNS, DHCP & network tools
+│   ├── Manage-DNS.ps1
+│   ├── Get-DHCPReport.ps1
+│   └── Scan-Network.ps1
+│
+├── Backup/              Veeam reporting
+│   └── Get-BackupStatus.ps1
+│
+├── Security/            Permission auditing
+│   └── Get-SharePermissions.ps1
+│
+└── .github/workflows/   CI/CD pipeline
+    └── ps-lint.yml
+```
+
+---
+
+## 📋 Scripts
+
+### Monitoring/
+
+| Script | Description |
+|--------|-------------|
+| `Check-DiskSpace.ps1` | Checks free disk space across multiple servers. Configurable threshold with color-coded warnings. CSV export. Designed for scheduled task automation |
+| `Check-SSLCertExpiry.ps1` | Validates SSL certificate expiry dates for Exchange OWA, SMTP/TLS, ADFS, VPN portal, and intranet services. Flags certificates expiring within configurable warning period |
+| `Watch-CriticalServices.ps1` | Monitors critical Windows services on DC, Exchange, file server, and backup server. Optional `-AutoRestart` flag to automatically recover stopped services |
+| `Check-WindowsUpdates.ps1` | Scans servers for pending Windows updates, identifies critical patches, and detects systems requiring reboot. Flags outdated machines |
+
+### Network/
+
+| Script | Description |
+|--------|-------------|
+| `Manage-DNS.ps1` | DNS record management: list all records (A, CNAME, MX), add/remove records, detect stale entries (90+ days), zone health check with scavenging status and forwarder audit |
+| `Get-DHCPReport.ps1` | DHCP scope utilization with visual progress bars, active lease inventory, reservation list, and server statistics (discover/offer/ack/nack counters) |
+| `Scan-Network.ps1` | Ping sweep across IP range with hostname resolution and MAC address lookup. Optional `-ScanPorts` flag scans common ports (RDP, SMB, HTTP, SQL, SSH) and identifies running services |
+
+### Backup/
+
+| Script | Description |
+|--------|-------------|
+| `Get-BackupStatus.ps1` | Veeam Backup & Replication job status report. Shows last job result, duration, and repository disk usage. Alerts on failed or warning jobs |
+
+### Security/
+
+| Script | Description |
+|--------|-------------|
+| `Get-SharePermissions.ps1` | Audits NTFS and Share-level permissions on file server shares. Flags dangerous "Everyone" access. Exports full permission matrix to CSV |
+
+---
+
+## 🚀 Usage
+
+```powershell
+# Clone
+git clone https://github.com/YOUR_USERNAME/windows-infra-monitor.git
+cd windows-infra-monitor
+
+# --- Monitoring ---
+.\Monitoring\Check-DiskSpace.ps1 -ThresholdPercent 15
+.\Monitoring\Check-SSLCertExpiry.ps1 -WarningDays 30
+.\Monitoring\Watch-CriticalServices.ps1 -AutoRestart
+.\Monitoring\Check-WindowsUpdates.ps1
+
+# --- Network ---
+.\Network\Manage-DNS.ps1 -Action Report -ZoneName "yourdomain.com"
+.\Network\Get-DHCPReport.ps1 -DHCPServer "DC01" -WarningPercent 80
+.\Network\Scan-Network.ps1 -Subnet "192.168.1" -ScanPorts
+
+# --- Backup ---
+.\Backup\Get-BackupStatus.ps1 -Hours 24
+
+# --- Security ---
+.\Security\Get-SharePermissions.ps1 -ServerName "FILESERVER" -ExportCSV
+```
+
+---
+
+## ⚙️ Requirements
+
+| Component | Needed For |
+|-----------|------------|
+| PowerShell 5.1+ | All scripts |
+| RSAT DNS Server Tools | `Manage-DNS.ps1` |
+| RSAT DHCP Server Tools | `Get-DHCPReport.ps1` |
+| Veeam PowerShell Snap-in | `Get-BackupStatus.ps1` |
+| WinRM enabled on targets | Remote monitoring scripts |
+| Admin permissions | Service restart, remote queries |
+
+## 🔧 Configuration
+
+Each script has configurable parameters:
+
+- **Server names**: Update `$Servers` arrays to match your environment
+- **Thresholds**: Disk free %, SSL warning days, DHCP utilization %
+- **Service lists**: Add/remove services per server role in `Watch-CriticalServices.ps1`
+- **SSL endpoints**: Update host/port list in `Check-SSLCertExpiry.ps1`
+- **DNS/DHCP server**: Set via `-DNSServer` and `-DHCPServer` parameters
+
+## 🤖 CI/CD
+
+PSScriptAnalyzer runs on every push via GitHub Actions. Checks syntax and best practices across all `.ps1` files.
+
+---
+
+## Author
+
+**Burak** — IT Specialist | 7+ Years Infrastructure & Systems Administration
